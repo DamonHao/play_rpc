@@ -6,12 +6,16 @@ __author__ = 'damonhao'
 
 HEADER_LEN = 4
 
-from net.tcp_connection import Buffer
+from net.buffer import Buffer
 
 
 class LengthHeaderCodec(object):
 
 	def __init__(self, message_callback):
+		"""
+		:param
+		message_callback(connection, content)
+		"""
 		self._message_callback = message_callback
 
 	def on_message(self, connection, read_buffer):

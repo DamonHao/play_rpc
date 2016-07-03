@@ -5,35 +5,37 @@ __author__ = 'damonhao'
 
 
 from tornado import ioloop
+from net import TcpServer
+from net.rpc import RpcBase
 
-from tcp_server import TcpServer
-from codec import LengthHeaderCodec
 
-
-class RpcServer(object):
-
-	def __init__(self, io_loop=None):
+class RpcServer(RpcBase):
+	def __init__(self, io_loop):
+		super(RpcServer, self).__init__()
 		self._server = TcpServer(io_loop)
-		self._codec = LengthHeaderCodec(self._on_message)
-		self._server.set_message_callback(self._codec.on_message)
 		self._server.set_connection_callback(self._on_connection)
-
-	def _on_message(self, conn, message):
-		print "[RPCServer]_on_message", conn.name, message
-		pass
-
-	def _on_connection(self, conn):
-		print "[RPCServer]_on_connection", conn.name, conn.is_connected
 
 	def listen(self, port, ip=""):
 		self._server.listen(port, ip)
 
-	def register_service(self, service):
-		pass
+	def start(self):
+		self._server.run()
 
+	@property
+	def _inner_mgr(self):
+		return self._server
 
 if __name__ == '__main__':
-	server = RpcServer()
+	from service.test_service import TestServiceServer
+	server = RpcServer(ioloop.IOLoop.instance())
+	server.register_service(TestServiceServer())
 	server.listen(8002)
-	ioloop.IOLoop.instance().start()
+	server.start()
+
+
+
+
+
+
+
 
