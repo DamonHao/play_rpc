@@ -48,4 +48,4 @@ class Buffer(object):
 		return self.retrieve(self._buffer_size)
 
 	def prepend(self, byte_size):
-		self._buffer.append(pack('i', byte_size))
+		self.append(pack('i', byte_size))

@@ -3,12 +3,12 @@
 
 __author__ = 'damonhao'
 
-import types
 
 import google.protobuf.service as service
 
-from net.rpc.rpc_codec import RpcCodec
+from net.rpc.codec import RpcCodec
 from net.rpc.rpc_pb2 import RpcMessage, REQUEST, RESPONSE, ERROR
+from net.rpc.controller import RpcController
 
 
 class RpcChannel(service.RpcChannel):
@@ -31,8 +31,7 @@ class RpcChannel(service.RpcChannel):
 
 	def _on_rpc_message(self, connection, message):
 		"""
-		:param
-		message : RpcMessage
+		:param message : RpcMessage
 		"""
 		if message.type == REQUEST:
 			self._call_service_method(message)
@@ -41,35 +40,33 @@ class RpcChannel(service.RpcChannel):
 		elif message.type == ERROR:
 			pass
 
-	def call_method(self, method, request_inst, response_type=None, done_callback=None):
+	def CallMethod(self, method_descriptor, rpc_controller, request, response_class, done):
 		"""call the method of remote service"""
 		message = RpcMessage()
 		message.type = REQUEST
 		message.id = self._id
 		self._id += 1
-		message.service = method.service.name
-		message.method = method.name
-		message.request = request_inst.SerializeToString()
-		self._outstandings[message.id] = OutstandingCall(response_type, done_callback)
+		message.service = method_descriptor.containing_service.full_name
+		message.method = method_descriptor.name
+		message.request = request.SerializeToString()
+		self._outstandings[message.id] = OutstandingCall(response_class, done)
 		self._codec.send(self._conn, message)
 
 	def _call_service_method(self, message):
 		""":param message : RpcMessage"""
 		service_name = message.service
 		service = self._services.get(service_name, None)
-		method_name = message.method
 		if service:
-			method = getattr(service, method_name)
-			request_type = method.___request_type__
-			request_inst = request_type.ParseFromString(message.request)
-			# if isinstance(method, types.GeneratorType):
-			# 	raise Exception()
-			# else:
-			# TODO support generator
-			response_inst = method(request_inst)
-			self._done_callback(message.id, response_inst)
+			controller = RpcController()
+			method_name = message.method
+			method = service.DESCRIPTOR.FindMethodByName(method_name)
+			request_class = service.GetRequestClass(method)
+			request_inst = request_class()
+			request_inst.ParseFromString(message.request)
+			done = DoneCallback(message.id)
+			service.CallMethod(method, controller, request_inst, done)
 		else:
-			raise Exception('can not find service: {0}'.format(service_name))
+			raise RuntimeError('can not find service: {0}'.format(service_name))
 
 	def _handle_response(self, message):
 		message_id = message.id
@@ -88,15 +85,24 @@ class RpcChannel(service.RpcChannel):
 	def services(self, value):
 		self._services = value
 
-	def _done_callback(self, message_id, response_inst):
-		message = RpcMessage()
-		message.type = RESPONSE
-		message.id = message_id
-		message.response = response_inst.SerializeToString()
-		self._codec.send(self._conn, message)
+	# def _done_callback(self, message_id, response_inst):
+	# 	message = RpcMessage()
+	# 	message.type = RESPONSE
+	# 	message.id = message_id
+	# 	message.response = response_inst.SerializeToString()
+	# 	self._codec.send(self._conn, message)
 
 
 class OutstandingCall(object):
 	def __init__(self, response_type, done_callback):
 		self.response_type = response_type
 		self.done_callback = done_callback
+
+
+class DoneCallback(object):
+
+	def __init__(self, messageId):
+		self._messageId = messageId
+
+	def __call__(self, response_ins=None):
+		print "DoneCallback", self._messageId

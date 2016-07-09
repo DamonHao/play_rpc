@@ -7,6 +7,7 @@ from net.rpc import RpcChannel
 
 
 class RpcBase(object):
+
 	def __init__(self):
 		self._services = {}  # service name: service
 
@@ -21,7 +22,7 @@ class RpcBase(object):
 			connection.context = None
 
 	def register_service(self, service):
-		self._services[service.name] = service
+		self._services[service.GetDescriptor().full_name] = service
 
 	@property
 	def _inner_mgr(self):

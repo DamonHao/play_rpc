@@ -24,9 +24,22 @@ class RpcClient(RpcBase):
 		return self._client
 
 
+def test_stub(rpcClient):
+	from net.rpc import stub_factory
+	from services import helloworld_pb2
+	print "test_stub", rpcClient
+	channel = rpcClient._client.connection.context
+	stub = stub_factory(helloworld_pb2.Greeter_Stub, channel)
+	request = helloworld_pb2.HelloRequest()
+	request.name = "haha"
+	stub.SayHello(request)
+
+
 if __name__ == '__main__':
-	from service.test_service import TestServiceClient
 	netAddress = NetAddress('127.0.0.1', 8002)
-	client = RpcClient(ioloop.IOLoop.instance(), netAddress)
-	client.register_service(TestServiceClient())
+	io_loop_inst = ioloop.IOLoop.instance()
+	client = RpcClient(io_loop_inst, netAddress)
+	io_loop_inst.call_later(1, test_stub, client)
 	client.connect()
+
+

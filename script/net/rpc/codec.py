@@ -26,14 +26,14 @@ class RpcCodec(object):
 			elif read_buffer.readable_bytes() >= byte_size + HEADER_LEN:
 				read_buffer.retrieve(HEADER_LEN)
 				content = read_buffer.retrieve(byte_size)
-				message = RpcMessage.ParseFromString(content)
-				self._message_callback(connection, message)
+				message = RpcMessage()
+				message.ParseFromString(content)
+				self._message_cb(connection, message)
 			else:
 				break
 
 	def send(self, connection, message):
-		""":param message: RpcMessage
-		"""
+		""":param message: RpcMessage"""
 		buffer = Buffer()
 		message_byte = message.SerializeToString()
 		byte_size = len(message_byte)

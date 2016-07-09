@@ -3,10 +3,10 @@
 
 __author__ = 'damonhao'
 
-from rpc_decorator import CommandRpc, ClientRpc, ServerRpc, ServiceInterface
-from rpc_channel import RpcChannel
-from rpc_base import RpcBase
-from rpc_service import RpcService
-from rpc_server import RpcServer
-from rpc_client import RpcClient
-
+from decorator import CommandRpc, ClientRpc, ServerRpc, ServiceInterface
+from channel import RpcChannel
+from base import RpcBase
+from service import RpcService
+from server import RpcServer
+from client import RpcClient
+from stub import stub_factory
