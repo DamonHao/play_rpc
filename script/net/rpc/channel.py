@@ -36,7 +36,7 @@ class RpcChannel(service.RpcChannel):
 		if message.type == REQUEST:
 			self._call_service_method(message)
 		elif message.type == RESPONSE:
-			pass
+			self._handle_response(message)
 		elif message.type == ERROR:
 			pass
 
@@ -49,6 +49,7 @@ class RpcChannel(service.RpcChannel):
 		message.service = method_descriptor.containing_service.full_name
 		message.method = method_descriptor.name
 		message.request = request.SerializeToString()
+
 		self._outstandings[message.id] = OutstandingCall(response_class, done)
 		self._codec.send(self._conn, message)
 
@@ -63,7 +64,7 @@ class RpcChannel(service.RpcChannel):
 			request_class = service.GetRequestClass(method)
 			request_inst = request_class()
 			request_inst.ParseFromString(message.request)
-			done = DoneCallback(message.id)
+			done = DoneCallback(self, message.id)
 			service.CallMethod(method, controller, request_inst, done)
 		else:
 			raise RuntimeError('can not find service: {0}'.format(service_name))
@@ -72,10 +73,12 @@ class RpcChannel(service.RpcChannel):
 		message_id = message.id
 		outstanding_call = self._outstandings.get(message_id, None)
 		if outstanding_call:
-			if outstanding_call.response_type:
-				response_inst = outstanding_call.response_type.ParseFromString(message.response)
+			if outstanding_call.response_class:
+				response_inst = outstanding_call.response_class()
+				response_inst.ParseFromString(message.response)
 				if outstanding_call.done_callback:
 					outstanding_call.done_callback(response_inst)
+			del self._outstandings[message_id]
 
 	@property
 	def services(self):
@@ -85,24 +88,29 @@ class RpcChannel(service.RpcChannel):
 	def services(self, value):
 		self._services = value
 
-	# def _done_callback(self, message_id, response_inst):
-	# 	message = RpcMessage()
-	# 	message.type = RESPONSE
-	# 	message.id = message_id
-	# 	message.response = response_inst.SerializeToString()
-	# 	self._codec.send(self._conn, message)
+	def send_message(self, message):
+		self._codec.send(self._conn, message)
 
 
 class OutstandingCall(object):
-	def __init__(self, response_type, done_callback):
-		self.response_type = response_type
+	def __init__(self, response_class, done_callback):
+		self.response_class = response_class
 		self.done_callback = done_callback
 
 
 class DoneCallback(object):
 
-	def __init__(self, messageId):
+	def __init__(self, channel, messageId):
+		self._channel = channel
 		self._messageId = messageId
 
-	def __call__(self, response_ins=None):
+	def __call__(self, response_inst):
 		print "DoneCallback", self._messageId
+		message = RpcMessage()
+		message.type = RESPONSE
+		message.id = self._messageId
+		message.response = response_inst.SerializeToString()
+		self._channel.send_message(message)
+
+
+

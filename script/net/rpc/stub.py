@@ -3,6 +3,8 @@
 
 __author__ = 'damonhao'
 
+from tornado.concurrent import Future
+
 from net.rpc.controller import RpcController
 
 
@@ -22,7 +24,16 @@ class _ServiceStub(object):
 			setattr(self, method.name, rpc)
 
 	def __call_stub_method___(self, method, request):
-		def done_callback():
-			pass
 		controller = RpcController()
+		future = Future()
+		done_callback = StubDoneCallBack(future)
 		method(self._rawStub, controller, request, done_callback)
+		return future
+
+
+class StubDoneCallBack(object):
+	def __init__(self, future):
+		self._future = future
+
+	def __call__(self, response_inst):
+		self._future.set_result(response_inst)

@@ -3,7 +3,7 @@
 
 __author__ = 'damonhao'
 
-from tornado import ioloop
+from tornado import ioloop, gen
 
 from net import TcpClient, NetAddress
 from net.rpc import RpcBase
@@ -24,6 +24,7 @@ class RpcClient(RpcBase):
 		return self._client
 
 
+@gen.coroutine
 def test_stub(rpcClient):
 	from net.rpc import stub_factory
 	from services import helloworld_pb2
@@ -32,7 +33,8 @@ def test_stub(rpcClient):
 	stub = stub_factory(helloworld_pb2.Greeter_Stub, channel)
 	request = helloworld_pb2.HelloRequest()
 	request.name = "haha"
-	stub.SayHello(request)
+	response = yield stub.SayHello(request)
+	print "receive: ", response.message
 
 
 if __name__ == '__main__':
