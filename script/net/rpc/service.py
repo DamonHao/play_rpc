@@ -5,25 +5,7 @@ __author__ = 'damonhao'
 
 
 class RpcService(object):
+	"""support common service function"""
 
-	@property
-	def name(self):
-		"""___service_interface__ is set by decorator ServiceInterface"""
-		return repr(self.___service_interface_cls__)
-
-	def server(self):
-		"""a server stub"""
-		pass
-
-	def ownClient(self):
-		pass
-
-	def otherClients(self):
-		pass
-
-	def allClients(self):
-		pass
-
-
-class Stub(object):
-	pass
+	def __init__(self, io_loop):
+		self.io_loop = io_loop

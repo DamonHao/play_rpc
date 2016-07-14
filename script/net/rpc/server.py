@@ -6,7 +6,7 @@ __author__ = 'damonhao'
 
 from tornado import ioloop
 from net import TcpServer
-from net.rpc import RpcBase
+from base import RpcBase
 
 
 class RpcServer(RpcBase):
@@ -25,11 +25,13 @@ class RpcServer(RpcBase):
 	def _inner_mgr(self):
 		return self._server
 
+
 if __name__ == '__main__':
 	from services.test_service import GreeterImp
 	print "RpcServer Start"
-	server = RpcServer(ioloop.IOLoop.instance())
-	server.register_service(GreeterImp())
+	io_loop = ioloop.IOLoop.instance()
+	server = RpcServer(io_loop)
+	server.register_service(GreeterImp(io_loop))
 	server.listen(8002)
 	server.start()
 

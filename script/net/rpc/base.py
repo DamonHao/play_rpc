@@ -3,7 +3,8 @@
 
 __author__ = 'damonhao'
 
-from net.rpc import RpcChannel
+
+from channel import RpcChannel
 
 
 class RpcBase(object):
@@ -27,4 +28,8 @@ class RpcBase(object):
 	@property
 	def _inner_mgr(self):
 		raise NotImplementedError()
+
+	@property
+	def io_loop(self):
+		return self._inner_mgr.io_loop
 

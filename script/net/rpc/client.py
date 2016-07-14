@@ -6,7 +6,8 @@ __author__ = 'damonhao'
 from tornado import ioloop, gen
 
 from net import TcpClient, NetAddress
-from net.rpc import RpcBase
+from base import RpcBase
+from stub import stub_factory
 
 
 class RpcClient(RpcBase):
@@ -23,17 +24,19 @@ class RpcClient(RpcBase):
 	def _inner_mgr(self):
 		return self._client
 
+	def create_stub(self, service_stub_class):
+		return stub_factory(service_stub_class, self._client.connection.context)
+
 
 @gen.coroutine
 def test_stub(rpcClient):
-	from net.rpc import stub_factory
 	from services import helloworld_pb2
 	print "test_stub", rpcClient
-	channel = rpcClient._client.connection.context
-	stub = stub_factory(helloworld_pb2.Greeter_Stub, channel)
+	stub = rpcClient.create_stub(helloworld_pb2.Greeter_Stub)
 	request = helloworld_pb2.HelloRequest()
 	request.name = "haha"
-	response = yield stub.SayHello(request)
+	# response = yield stub.SayHello(request)
+	response = yield stub.SayHelloWithCoroutine(request)
 	print "receive: ", response.message
 
 
