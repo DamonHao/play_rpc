@@ -8,7 +8,7 @@ import google.protobuf.service as service
 
 from net.rpc.codec import RpcCodec
 from net.rpc.rpc_pb2 import RpcMessage, REQUEST, RESPONSE, ERROR
-from net.rpc.controller import RpcController
+from net.rpc.controller import RpcController, ServiceSideController
 
 
 class RpcChannel(service.RpcChannel):
@@ -17,13 +17,12 @@ class RpcChannel(service.RpcChannel):
 	The Service may be running on another machine. Normally, you should not call an RpcChannel
 	directly, but instead construct a stub Service wrapping it.
 	"""
-	def __init__(self, connection, io_loop):
+	def __init__(self, connection):
 		self._conn = connection
 		self._codec = RpcCodec(self._on_rpc_message)
 		self._id = 0
 		self._outstandings = {}  # id : OutStandingCall
 		self._services = {}  # the ref from RpcServer
-		self._io_loop = io_loop
 
 	@property
 	def on_message(self):
@@ -58,7 +57,7 @@ class RpcChannel(service.RpcChannel):
 		service_name = message.service
 		service = self._services.get(service_name, None)
 		if service:
-			controller = RpcController()
+			controller = ServiceSideController(self)
 			method_name = message.method
 			method = service.DESCRIPTOR.FindMethodByName(method_name)
 			request_class = service.GetRequestClass(method)
@@ -105,7 +104,6 @@ class DoneCallback(object):
 		self._messageId = messageId
 
 	def __call__(self, response_inst):
-		print "DoneCallback", self._messageId
 		message = RpcMessage()
 		message.type = RESPONSE
 		message.id = self._messageId

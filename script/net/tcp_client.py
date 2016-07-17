@@ -23,7 +23,7 @@ class TcpClient(object):
 	@gen.coroutine
 	def _connect(self, host, port):
 		iostream = yield self._client.connect(host, port)
-		conn = TcpConnection(iostream, (host, port))
+		conn = TcpConnection(self.io_loop, iostream, (host, port))
 		conn.set_connection_callback(self._connection_cb)
 		conn.set_message_callback(self._message_cb)
 		conn.set_write_complete_callback(self._write_complete_cb)

@@ -27,11 +27,11 @@ class RpcServer(RpcBase):
 
 
 if __name__ == '__main__':
-	from services.test_service import GreeterImp
+	from services.test_service import GreeterServerImp
 	print "RpcServer Start"
 	io_loop = ioloop.IOLoop.instance()
 	server = RpcServer(io_loop)
-	server.register_service(GreeterImp(io_loop))
+	server.register_service(GreeterServerImp())
 	server.listen(8002)
 	server.start()
 

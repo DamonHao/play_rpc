@@ -9,12 +9,13 @@ from buffer import Buffer
 
 class TcpConnection(object):
 
-	def __init__(self, iostream, peer_addr):
+	def __init__(self, io_loop, iostream, peer_addr):
 		"""although iostream has read buffer, but provide a buffer object
 		is more helpful for upper logic
 		:param
 		peer_addr (host, prot)
 		"""
+		self.io_loop = io_loop
 		self._iostream = iostream
 		self._read_buffer = Buffer()
 		self._peer_addr = peer_addr

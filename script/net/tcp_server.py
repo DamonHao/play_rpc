@@ -21,7 +21,7 @@ class TcpServer(TornadoTCPServer):
 		self._write_complete_cb = None
 
 	def handle_stream(self, stream, address):
-		conn = TcpConnection(stream, address)
+		conn = TcpConnection(self.io_loop, stream, address)
 		self._connections[conn.name] = conn
 		conn.set_connection_callback(self._connection_cb)
 		conn.set_message_callback(self._message_cb)

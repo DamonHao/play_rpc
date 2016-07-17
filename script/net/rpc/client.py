@@ -31,20 +31,21 @@ class RpcClient(RpcBase):
 @gen.coroutine
 def test_stub(rpcClient):
 	from services import helloworld_pb2
-	print "test_stub", rpcClient
-	stub = rpcClient.create_stub(helloworld_pb2.Greeter_Stub)
+	stub = rpcClient.create_stub(helloworld_pb2.GreeterServer_Stub)
 	request = helloworld_pb2.HelloRequest()
-	request.name = "haha"
-	# response = yield stub.SayHello(request)
-	response = yield stub.SayHelloWithCoroutine(request)
+	request.name = "Client"
+	response = yield stub.SayHello(request)
+	# response = yield stub.SayHelloWithCoroutine(request)
 	print "receive: ", response.message
 
 
 if __name__ == '__main__':
 	netAddress = NetAddress('127.0.0.1', 8002)
-	io_loop_inst = ioloop.IOLoop.instance()
-	client = RpcClient(io_loop_inst, netAddress)
-	io_loop_inst.call_later(1, test_stub, client)
+	io_loop = ioloop.IOLoop.instance()
+	client = RpcClient(io_loop, netAddress)
+	from services.test_service import GreeterClientImp
+	client.register_service(GreeterClientImp())
+	io_loop.call_later(1, test_stub, client)
 	client.connect()
 
 

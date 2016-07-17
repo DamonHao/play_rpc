@@ -8,6 +8,11 @@ import google.protobuf.service as service
 
 class RpcController(service.RpcController):
 	"""An RpcController mediates a single method call."""
+	pass
 
-	def __init__(self):
-		pass
+
+class ServiceSideController(RpcController):
+
+	def __init__(self, channel):
+		super(ServiceSideController, self).__init__()
+		self.channel = channel

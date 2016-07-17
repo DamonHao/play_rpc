@@ -20,7 +20,7 @@ class _ServiceStub(object):
 		self._channel = channel
 		service_stub = self
 		for method in service_stub_class.GetDescriptor().methods:
-			rpc = lambda request: service_stub.__call_stub_method___(service_stub_class.__dict__[method.name], request)
+			rpc = lambda request, method_name = method.name: service_stub.__call_stub_method___(service_stub_class.__dict__[method_name], request)
 			setattr(self, method.name, rpc)
 
 	def __call_stub_method___(self, method, request):

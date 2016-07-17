@@ -13,9 +13,9 @@ class RpcBase(object):
 		self._services = {}  # service name: service
 
 	def _on_connection(self, connection):
-		print "[RpcBase]_on_connection", connection.name, connection.is_connected
+		print "connection:{0} is connected:{1}".format(connection.name, connection.is_connected)
 		if connection.is_connected:
-			channel = RpcChannel(connection, self._inner_mgr.io_loop)
+			channel = RpcChannel(connection)
 			channel.services = self._services
 			connection.set_message_callback(channel.on_message)
 			connection.context = channel
@@ -23,6 +23,7 @@ class RpcBase(object):
 			connection.context = None
 
 	def register_service(self, service):
+		service.init_on_register(self)
 		self._services[service.GetDescriptor().full_name] = service
 
 	@property
