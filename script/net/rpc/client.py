@@ -39,13 +39,30 @@ def test_stub(rpcClient):
 	print "receive: ", response.message
 
 
-if __name__ == '__main__':
+def test_one_loop():
 	netAddress = NetAddress('127.0.0.1', 8002)
-	io_loop = ioloop.IOLoop.instance()
+	from net.io_loop import IOLoop
+	io_loop = IOLoop()
+	io_loop.prepare()
 	client = RpcClient(io_loop, netAddress)
 	from services.test_service import GreeterClientImp
 	client.register_service(GreeterClientImp())
 	io_loop.call_later(1, test_stub, client)
 	client.connect()
+	while True:
+		io_loop.one_loop(2)
 
+
+if __name__ == '__main__':
+	# netAddress = NetAddress('127.0.0.1', 8002)
+	# # io_loop = ioloop.IOLoop.instance()
+	# from net.io_loop import IOLoop
+	# io_loop = IOLoop()
+	# client = RpcClient(io_loop, netAddress)
+	# from services.test_service import GreeterClientImp
+	# client.register_service(GreeterClientImp())
+	# io_loop.call_later(1, test_stub, client)
+	# client.connect()
+	# io_loop.start()
+	test_one_loop()
 

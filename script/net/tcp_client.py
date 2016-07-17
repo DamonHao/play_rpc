@@ -21,7 +21,9 @@ class TcpClient(object):
 		self._netAddress = netAddress
 
 	@gen.coroutine
-	def _connect(self, host, port):
+	def connect(self):
+		netAddress = self._netAddress
+		host, port = netAddress.address, netAddress.port
 		iostream = yield self._client.connect(host, port)
 		conn = TcpConnection(self.io_loop, iostream, (host, port))
 		conn.set_connection_callback(self._connection_cb)
@@ -30,12 +32,6 @@ class TcpClient(object):
 		conn.set_close_callback(self._remove_connection)
 		conn.connect_established()
 		self._conn = conn
-
-	def connect(self):
-		netAddress = self._netAddress
-		io_loop = self._client.io_loop
-		io_loop.run_sync(lambda: self._connect(netAddress.address, netAddress.port))
-		io_loop.start()
 
 	def set_connection_callback(self, callback):
 		""":param callback:(connection)"""
