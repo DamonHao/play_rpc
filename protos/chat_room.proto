@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+option py_generic_services = true;
+
+package chat_room;
+
+
+service ChatServer {
+	rpc Login (LoginRequest) returns (LoginReply) {}
+	rpc Logout (LogoutRequest) returns (LogoutReply) {}
+	rpc Speak (SpeakRequest) returns (SpeakReply) {}
+}
+
+service ChatClient {
+	rpc ReceiveWord (ReceiveWorldRequest) returns (ReceiveWorldReply) {}
+}
+
+enum CommonReplyState
+{
+	OK = 0;
+	ERROR = 1;
+}
+
+message LoginRequest {
+	string account = 1;
+	string password = 2;
+}
+
+message LoginReply {
+	enum LoginState
+	{
+		OK = 0;
+		ALREADY_LOGIN = 1;
+		ERROR = 2;
+	}
+	LoginState state = 1;
+	int32 token = 2;
+}
+
+message LogoutRequest {
+	int32 token = 1;
+}
+
+message LogoutReply {
+	CommonReplyState state = 1;
+}
+
+
+message SpeakRequest {
+	int32 token = 1;
+	string content = 2;
+}
+
+message SpeakReply {
+	CommonReplyState state = 1;
+}
+
+message ReceiveWorldRequest {
+	string account = 1;
+	string content = 2;
+}
+
+message ReceiveWorldReply {
+	CommonReplyState state = 1;
+}
