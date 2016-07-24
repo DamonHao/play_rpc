@@ -6,7 +6,7 @@ __author__ = 'damonhao'
 from tornado import ioloop, gen
 
 from net import TcpClient, NetAddress
-from base import RpcBase
+from common import RpcBase
 from stub import stub_factory
 
 
@@ -25,7 +25,9 @@ class RpcClient(RpcBase):
 		return self._client
 
 	def create_stub(self, service_stub_class):
-		return stub_factory(service_stub_class, self._client.connection.context)
+		channel = self._client.connection.context
+		assert channel, "there is not valid channel"
+		return stub_factory(service_stub_class, channel)
 
 
 @gen.coroutine

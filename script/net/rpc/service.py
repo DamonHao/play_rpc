@@ -12,7 +12,7 @@ class RpcService(object):
 	"""support common service function"""
 
 	def __init__(self):
-		self._service_mgr = None
+		self._service_mgr = None  # RpcServer
 
 	@property
 	def service_mgr(self):
@@ -23,3 +23,7 @@ class RpcService(object):
 
 	def create_stub(self, service_stub_class, channel):
 		return stub_factory(service_stub_class, channel)
+
+	@property
+	def io_loop(self):
+		return self._service_mgr.io_loop

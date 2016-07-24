@@ -6,7 +6,7 @@ __author__ = 'damonhao'
 
 from tornado import ioloop
 from net import TcpServer
-from base import RpcBase
+from common import RpcBase
 
 
 class RpcServer(RpcBase):

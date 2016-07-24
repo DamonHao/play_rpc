@@ -20,7 +20,7 @@ def Rpc(service_func):
 	def wrapper(self, controller, request, done):
 		response = service_func(self, request, controller)
 		if isinstance(response, Future):
-			self.service_mgr.io_loop.add_future(response, lambda future: done(future.result()))
+			self.io_loop.add_future(response, lambda future: done(future.result()))
 		else:
 			if request is None:
 				response = Empty()

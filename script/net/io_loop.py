@@ -54,7 +54,7 @@ class EnhancedPollIoLoop(PollIOLoop):
 		self._thread_ident = thread.get_ident()
 		self._running = True
 
-	def one_loop(self, default_time_out):
+	def one_loop(self, default_time_out=0):
 		if self._isNotReady:
 			raise RuntimeError("IoLoop is not prepared!")
 		try:

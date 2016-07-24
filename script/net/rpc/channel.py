@@ -23,6 +23,7 @@ class RpcChannel(service.RpcChannel):
 		self._id = 0
 		self._outstandings = {}  # id : OutStandingCall
 		self._services = {}  # the ref from RpcServer
+		self._context = None
 
 	@property
 	def on_message(self):
@@ -89,6 +90,14 @@ class RpcChannel(service.RpcChannel):
 
 	def send_message(self, message):
 		self._codec.send(self._conn, message)
+
+	@property
+	def context(self):
+		return self._context
+
+	@context.setter
+	def context(self, value):
+		self._context = value
 
 
 class OutstandingCall(object):

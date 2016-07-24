@@ -5,7 +5,7 @@ __author__ = 'damonhao'
 
 from decorator import Rpc
 from channel import RpcChannel
-from base import RpcBase
+from common import RpcBase
 from service import RpcService
 from server import RpcServer
 from client import RpcClient
